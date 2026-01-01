@@ -46,12 +46,26 @@ This project represents a **complete end-to-end solution** for Indian Sign Langu
 
 
 
-https://github.com/user-attachments/assets/1791ba5c-d646-4241-8c92-a245a165eaab
 
+
+
+
+
+
+
+https://github.com/user-attachments/assets/02bfec33-04bf-448d-bee6-4ebae091a604
+
+
+
+https://github.com/user-attachments/assets/a0db32a4-58c8-4858-b2e0-2bbb026ef21f
 
 
 
 https://github.com/user-attachments/assets/12219c21-2758-40c8-8b37-9244eff5704a
+
+
+
+https://github.com/user-attachments/assets/ee1bcafd-d428-41df-8119-fb0e7b57fb12
 
 
 ---
@@ -112,10 +126,10 @@ https://github.com/user-attachments/assets/12219c21-2758-40c8-8b37-9244eff5704a
 │  (A-Z, 1-9)   │          │  (Words/Phrases)  │
 └───────┬───────┘          └───────┬───────────┘
         │                          │
-        │  ┌──────────────────────┘
-        │  │
-        │  │  ┌─────────────────────────────┐
-        │  └─►│  HIERARCHICAL CLASSIFIER    │
+        │                          │
+        │                          ▼
+        │     ┌────────────────────-────────┐
+        │     │  HIERARCHICAL CLASSIFIER    │
         │     │  ┌──────────────────────┐   │
         │     │  │  Gating Model (3cls) │   │
         │     │  └──────────┬───────────┘   │
@@ -127,18 +141,18 @@ https://github.com/user-attachments/assets/12219c21-2758-40c8-8b37-9244eff5704a
         │     └─────────────┬───────────────┘
         │                   │
 ┌───────▼───────────────────▼───────┐
-│    GEOMETRIC CORRECTIONS           │
-│  Physics-Based Validation          │
+│    GEOMETRIC CORRECTIONS          │
+│  Physics-Based Validation         │
 └───────┬───────────────────────────┘
         │
 ┌───────▼───────────────────────────┐
-│    SENTENCE FORMATION              │
-│  ISL Grammar Parser                │
+│    SENTENCE FORMATION             │
+│  ISL Grammar Parser               │
 └───────┬───────────────────────────┘
         │
 ┌───────▼───────────────────────────┐
-│    MULTI-LANGUAGE TRANSLATION      │
-│  English → Hindi/Punjabi/etc.      │
+│    MULTI-LANGUAGE TRANSLATION     │
+│  English → Hindi/Punjabi/etc.     │
 └───────┬───────────────────────────┘
         │
 ┌───────▼───────────────────────────┐
@@ -167,34 +181,34 @@ The hierarchical classifier is the **crown jewel** of this system. Instead of tr
                     │                         │
                     │  "Which group does      │
                     │   this sign belong to?" │
-                    └───────────┬─────────────┘
-                                │
-                    ┌───────────┼───────────┐
-                    │           │           │
-        ┌───────────▼────┐ ┌───▼────┐ ┌───▼───────────┐
-        │ SPECIALIST 0   │ │ SPEC 1 │ │ SPECIALIST 2  │
-        │ (Pronouns &    │ │(Objects│ │ (Actions &    │
-        │  Time)         │ │& Places│ │  Descriptors) │
-        │                │ │)       │ │               │
-        │ 20 classes     │ │20 class│ │ 20 classes    │
-        │ • I            │ │• School│ │ • Happy       │
-        │ • You          │ │• Market│ │ • Big         │
-        │ • Today        │ │• Bag   │ │ • Red         │
-        │ • ...          │ │• ...   │ │ • ...         │
-        └────────────────┘ └────────┘ └───────────────┘
-                    │           │           │
-                    └───────────┼───────────┘
-                                │
-                        (Only ONE runs!)
-                                │
-                                ▼
-                    ┌─────────────────────────┐
-                    │   FINAL PREDICTION      │
-                    │                         │
-                    │  Sign: "I"              │
-                    │  Confidence: 85.5%      │
-                    │  (= 95% × 90%)          │
-                    └─────────────────────────┘
+                    └──────────────────|──────┘
+                                        │
+                    ┌───────────-───────|────-----------------┐
+                    │                   │                     │
+        ┌───────────▼────┐     ┌───-----▼────-┐         ┌───--▼─────────┐
+        │ SPECIALIST 0   │     │ SPECIALIST 1 │         │ SPECIALIST 2  │
+        │ (Pronouns &    │     │(Objects &    │         │ (Actions &    │
+        │  Time)         │     │ Places)      │         │  Descriptors) │
+        │                │     │              │         │               │
+        │ 20 classes     │     │20 class      │         │ 20 classes    │
+        │ • I            │     │• School      │         │ • Happy       │
+        │ • You          │     │• Market      │         │ • Big         │
+        │ • Today        │     │• Bag         │         │ • Red         │
+        │ • ...          │     │• ...         │         │ • ...         │
+        └────────────────┘     └────────------┘         └───────────────┘
+                    │                 │                         │
+                    └───────────------┼─────────--------------──┘
+                                      │
+                              (Only ONE runs!)
+                                      │
+                                      ▼
+                          ┌─────────────────────────┐
+                          │   FINAL PREDICTION      │
+                          │                         │
+                          │  Sign: "I"              │
+                          │  Confidence: 85.5%      │
+                          │  (= 95% × 90%)          │
+                          └─────────────────────────┘
 ```
 
 **The Key Insight:** Instead of asking "Which of 60 signs is this?" all at once, we ask:
@@ -216,8 +230,8 @@ The hierarchical classifier is the **crown jewel** of this system. Instead of tr
 └─────────────────────────────────────────────────────────────────┘
 
 INPUT: Video (30 frames) + Landmarks (30 × 154)
-   │
-   ├──────────────────┐
+   │                            |    
+   ├                  __________|   
    │                  │
    ▼                  ▼
 ┌──────────────┐  ┌──────────────┐
@@ -311,6 +325,9 @@ INPUT: Video (30 frames) + Landmarks (30 × 154)
 │                     │   │  • Specialist: 92%  │
 └─────────────────────┘   └─────────────────────┘
 ```
+
+<img width="321" height="540" alt="Screenshot 2026-01-01 at 5 11 37 PM" src="https://github.com/user-attachments/assets/e69f1014-d2dd-4cfc-a683-8ccd7cd95cba" />
+
 
 ---
 
