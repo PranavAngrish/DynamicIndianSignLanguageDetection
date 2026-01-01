@@ -774,9 +774,9 @@ else: interpolation = 'nearest'
 ### Data Collection
 - **Total Videos**: 2000+ recordings
 - **Signs Covered**: 60+ ISL signs
-- **Participants**: 15+ signers (diversity)
+- **Participants**: 10+ signers (diversity)
 - **Environments**: Indoor/outdoor, varying lighting
-- **Recording**: 30 FPS, 720p resolution
+- **Recording**: 25 FPS, 720p resolution
 
 ### Preprocessing Pipeline
 
@@ -1013,23 +1013,6 @@ Output: "I will meet you tomorrow"
 - Custom augmentation: 93.8%
 - **Generalization boost**: +8.6%
 
-### Computational Efficiency
-
-**Preprocessing:**
-- Sequential: 12 hours (2000 videos)
-- Parallel (ours): 2 hours
-- **Speedup**: 6x
-
-**Inference:**
-- CPU (i7): 150ms/video
-- GPU (RTX 3070): 85ms/video
-- **Throughput**: ~12 FPS real-time
-
-**Model Size:**
-- Gating model: 15 MB
-- Specialist model: 45 MB
-- Static model: 2 MB
-- **Total**: ~150 MB (deployable)
 
 ---
 
@@ -1064,21 +1047,8 @@ venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-4. **Download Models**
-```bash
-# Download pre-trained weights
-python download_models.py
 
-# Models will be saved to:
-# - checkpoints/gating_model/
-# - checkpoints/group_0/
-# - checkpoints/group_1/
-# - checkpoints/group_2/
-# - isl_static_model.h5
-# - isl_rf_model.pkl
-```
-
-5. **Verify Installation**
+4. **Verify Installation**
 ```bash
 python -c "import torch; print(torch.cuda.is_available())"
 python -c "import mediapipe; print('MediaPipe OK')"
@@ -1312,21 +1282,21 @@ video: <binary file>
 
 ## 🎯 Future Roadmap
 
-### Short Term (3-6 months)
+### Short Term
 - [ ] **Sentence-level recognition**: Full ISL sentences
 - [ ] **Mobile app**: React Native deployment
 - [ ] **Expanded vocabulary**: 200+ signs
 - [ ] **Regional variations**: Different ISL dialects
 - [ ] **Real-time feedback**: Pronunciation guidance for learners
 
-### Medium Term (6-12 months)
+### Medium Term
 - [ ] **Contextual understanding**: BERT-based context
 - [ ] **Bidirectional translation**: English → ISL animation
 - [ ] **Multi-person recognition**: Group conversations
 - [ ] **Emotion detection**: Facial expression analysis
 - [ ] **Edge deployment**: Raspberry Pi optimization
 
-### Long Term (1-2 years)
+### Long Term
 - [ ] **Live captioning**: Real-time video subtitles
 - [ ] **AR integration**: HoloLens/Quest support
 - [ ] **Semantic understanding**: Intent recognition
@@ -1338,11 +1308,59 @@ video: <binary file>
 ## 📖 Research & References
 
 ### Papers Studied
-1. "Pose-based Sign Language Recognition using GCN and BERT" (2021)
-2. "Sign Language Recognition with Transformer Networks" (2022)
-3. "MediaPipe Hands: Real-time Hand Tracking" (Google AI)
-4. "Focal Loss for Dense Object Detection" (Lin et al.)
-5. "Attention Is All You Need" (Vaswani et al.)
+1. Jain Sanil, Raja K.V. Sameer, “Indian Sign Language Character Recognition”, Indian
+Institute of Technology, Kanpur, 2015.
+2. Shenoy Kartik, Dastane Tejas, Rao Varun, Vyavaharkar Devendra, “Real Time Indian
+Sign Language (ISL) Recognition”, K. J. Somaiya College of Engineering, University of
+Mumbai, 2018.
+3. Rautaray S. S., Agrawal A., “Indian Sign Language Recognition System using SURF
+with SVM and CNN.” Array, Elsevier, vol. 15, 2022.
+4. Vashisht Harsh Kumar, Tarafder Tuhin, Aziz Rehan, Arora Mamta, Alpana, “Hand
+Gesture Recognition in Indian Sign Language using Deep Learning”, Engineering
+Proceedings, MDPI, vol. 59(1), 2023.
+5. Mistree Kinjal Bhargavkumar, “Computer Vision based Approach for Indian Sign
+Language Recognition and Translation using Deep Learning”, Uka Tarsadia University,
+2023.
+6. Prasad Suraj, Kushwaha Mukund, Shaw Manish, Mishra Eshika, Gannu Viswateja,
+Singhla Dikshit, “Real-Time Audio to ISL Conversion and Vice-Versa”, Indian Institute
+of Technology, Bombay, 2024.
+7. Kumar S., Sharma A., “Railway Stations Announcement System for the Deaf.” In
+Proceedings of ICON 2020: International Conference on Natural Language Processing,
+2020.
+8. Prasad A., Bandyopadhyay P., Basu A., “INGIT: An Indian Sign Language
+Generation System for Railway Reservation.” In Proceedings of the International
+Conference on Universal Access in Human–Computer Interaction, 2007.
+9. P. S. Patil, R. S. Pawar, and S. K. Shinde, “Indian Sign Language Recognition using
+SURF and Bag-of-Visual-Words,” Symbiosis Institute Research Report, 2018.
+10. Indian Sign Language Research and Training Centre (ISLRTC), “Official Website.”
+Internet: https://islrtc.nic.in/, 2023 [Accessed: Dec. 2025].
+Page of
+87 90
+11. OpenHands Project, “OpenHands: Pre-trained models and datasets for sign
+languages.” Internet: https://github.com/openhands-project, 2022 [Accessed: Dec. 2025].
+12. Deaf Enabled Foundation, “DEF Indian Sign Language App.” Internet: https://
+def.org.in/isl-app, 2021 [Accessed: Dec. 2025].
+13. ISLAR Project, “Indian Sign Language Augmented Reality Prototype.” Internet:
+https://odsc.com/blog/indian-sign-language-ar/, 2019 [Accessed: Dec. 2025].
+14. Ministry of Electronics and Information Technology, Government of India,
+“Bhashini: National Language Translation Mission.” Internet: https://
+www.bhashini.gov.in/, 2022 [Accessed: Dec. 2025].
+15. Goyal R., Kaur M., “ISL-from-Text: Automated Sign Language Translation from
+Hindi.” DST Sponsored Project, Thapar Institute of Engineering and Technology.
+Internet: http://islfromtext.in/, 2020 [Accessed: Dec. 2025].
+16. Information technology — Artificial intelligence — Framework for AI systems
+using machine learning, ISO/IEC 23053, 2022.
+17. The IEEE Global Initiative on Ethics of Autonomous and Intelligent Systems —
+IEEE 7000 Series Standards, 2020–2021.
+18. Coding of audio-visual objects — Part 10: Advanced Video Coding (AVC), ISO/IEC
+14496-10, 2019.
+19. High Efficiency Video Coding (HEVC), ISO/IEC 23008-2, 2021.
+20. Speech Synthesis Markup Language (SSML) Version 1.1, W3C Recommendation,
+2010.
+21. Codes for the representation of names of languages — Part 1: Alpha-2 code, ISO
+639-1, 2002.
+22. Unicode Standard, UTF-8 Encoding, Unicode Consortium, 2012.
+23. Web Content Accessibility Guidelines (WCAG) 2.1, W3C Recommendation, 2018.
 
 ### Technologies Used
 - **Computer Vision**: MediaPipe, OpenCV, PIL
@@ -1370,31 +1388,6 @@ Sign language users face daily communication barriers. This system isn't just ab
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these guidelines:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-**Areas for Contribution:**
-- Expanding sign vocabulary
-- Regional ISL variations
-- Performance optimization
-- Mobile deployment
-- Documentation improvements
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 🙏 Acknowledgments
 
 - **ISL Community**: Signers who contributed data
@@ -1406,12 +1399,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-**Developer:** [Your Name]  
-**Email:** your.email@example.com  
-**LinkedIn:** [Your LinkedIn]  
-**Portfolio:** [Your Portfolio]  
+**Developer:** Pranav  
+**Email:** pranavangrishwork@gmail.com  
+**LinkedIn:** [Your LinkedIn]   
 
-**Project Link:** https://github.com/yourusername/isl-recognition
 
 ---
 
