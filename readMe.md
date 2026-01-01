@@ -1394,14 +1394,6 @@ Sign language users face daily communication barriers. This system isn't just ab
 
 ---
 
-## 📞 Contact
-
-**Developer:** Pranav  
-**Email:** pranavangrishwork@gmail.com  
-**LinkedIn:** https://www.linkedin.com/in/pranav-angrish-2b3693252/  
-
-
----
 
 <div align="center">
 
