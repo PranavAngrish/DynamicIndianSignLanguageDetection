@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ISL TRANSLATOR — Motion Trigger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background: #030014;
+        color: #d1d5db;
+        overflow: hidden;
+      }
+
+      /* Mode Backgrounds */
+      body.static-mode {
+        background: #030014;
+      }
+      body.dynamic-mode {
+        background: linear-gradient(135deg, #0f172a, #1e1b4b);
+      }
+
+      /* Glassmorphism Panels */
+      .ai-panel {
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .text-orchid {
+        color: #d8b4fe;
+      }
+
+      /* Recording Progress Bar Animation */
+      .progress-bar {
+        transition: width 100ms linear;
+      }
+
+      /* Pulse Animation for Recording State */
+      @keyframes pulse-red {
+        0% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+      }
+      .recording-pulse {
+        animation: pulse-red 2s infinite;
+        border-color: #ef4444 !important;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #4c1d95;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+
+  <body id="page-body" class="static-mode text-sm">
+    <div id="app" class="h-screen w-full p-3 flex gap-4 relative z-10">
+      <aside class="w-[300px] flex-shrink-0 flex flex-col gap-3">
+        <div class="ai-panel p-5 rounded-xl flex flex-col gap-6 h-full">
+          <div>
+            <h1 class="text-3xl font-bold text-white tracking-tight">ISL AI</h1>
+            <p
+              class="text-xs text-gray-400 mt-1 uppercase tracking-wider font-semibold"
+            >
+              Real-time Translation
+            </p>
+          </div>
+
+          <div class="bg-black/30 rounded-xl p-2 border border-purple-500/20">
+            <div class="flex items-center justify-between px-2 pb-2">
+              <span
+                id="static-label"
+                class="font-bold text-orchid transition-colors duration-300"
+                >Static</span
+              >
+              <span
+                id="dynamic-label"
+                class="font-bold text-gray-500 transition-colors duration-300"
+                >Dynamic</span
+              >
+            </div>
+            <label class="relative flex items-center cursor-pointer w-full">
+              <input type="checkbox" id="mode-toggle" class="sr-only peer" />
+              <div
+                class="w-full h-10 bg-gray-800/80 rounded-lg peer-checked:bg-indigo-900/80 transition-all border border-gray-600"
+              >
+                <div
+                  class="absolute left-1 top-1 w-[calc(50%-4px)] h-8 bg-purple-600 rounded-md transition-all duration-300 peer-checked:translate-x-[100%] shadow-lg flex items-center justify-center"
+                >
+                  <svg
+                    class="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          <div
+            id="instruction-panel"
+            class="flex-grow bg-black/20 rounded-xl p-4 border border-purple-500/10 flex flex-col justify-center text-center"
+          >
+            <p id="mode-description" class="text-gray-300 leading-relaxed">
+              Switch to <b>Dynamic</b> to translate full sentences using motion
+              gestures.
+            </p>
+
+            <div
+              id="dynamic-instructions"
+              class="hidden mt-4 text-xs text-left space-y-2 text-gray-400"
+            >
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                <span>Rest hand to reset</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                <span>Move hand to trigger record</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                <span>Wait for processing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-auto">
+            <label class="text-xs font-semibold text-gray-400 mb-2 block"
+              >Output Language</label
+            >
+            <select
+              id="language-select"
+              class="w-full bg-black/40 border border-purple-500/30 text-white p-3 rounded-lg focus:outline-none focus:border-purple-500 transition-colors"
+            >
+              <option value="en">English (Display Only)</option>
+              <option value="hi">Hindi</option>
+              <option value="pa">Punjabi</option>
+              <option value="bn">Bengali</option>
+              <option value="gu">Gujarati</option>
+              <option value="mr">Marathi</option>
+            </select>
+          </div>
+        </div>
+      </aside>
+
+      <main class="flex-grow flex flex-col gap-4 relative">
+        <div
+          id="video-wrapper"
+          class="relative flex-grow bg-black rounded-2xl overflow-hidden border-2 border-purple-500/20 shadow-2xl transition-all duration-300"
+        >
+          <div
+            id="dynamic-overlay"
+            class="hidden absolute top-0 left-0 w-full z-40 p-4 flex justify-between items-start pointer-events-none"
+          >
+            <div
+              id="status-badge"
+              class="px-4 py-2 rounded-lg backdrop-blur-md font-bold text-white shadow-lg transition-colors duration-300 bg-blue-600/80 border border-blue-400/50"
+            >
+              WAITING FOR MOTION
+            </div>
+
+            <div
+              id="timer-display"
+              class="hidden text-3xl font-mono font-bold text-white drop-shadow-md"
+            >
+              0.0s
+            </div>
+          </div>
+
+          <div
+            id="progress-container"
+            class="hidden absolute top-0 left-0 w-full h-2 bg-gray-800 z-50"
+          >
+            <div
+              id="progress-fill"
+              class="h-full bg-red-500 w-0 progress-bar"
+            ></div>
+          </div>
+
+          <video
+            id="webcam"
+            class="w-full h-full object-cover transform scaleX-[-1]"
+            autoplay
+            playsinline
+          ></video>
+          <canvas
+            id="landmark-canvas"
+            class="absolute top-0 left-0 w-full h-full z-10 transform scaleX-[-1] pointer-events-none"
+          ></canvas>
+
+          <div
+            id="motion-meter-container"
+            class="hidden absolute bottom-4 left-4 right-4 z-40 pointer-events-none"
+          >
+            <div
+              class="flex justify-between text-xs text-gray-300 mb-1 font-mono"
+            >
+              <span>MOTION LEVEL</span>
+              <span id="motion-value">0%</span>
+            </div>
+            <div
+              class="h-1.5 w-full bg-gray-700/80 rounded-full overflow-hidden backdrop-blur-sm"
+            >
+              <div
+                id="motion-bar"
+                class="h-full bg-emerald-400 transition-all duration-75 w-0"
+              ></div>
+            </div>
+            <div class="relative w-full h-0">
+              <div
+                class="absolute bottom-1.5 left-[20%] w-0.5 h-3 bg-white shadow-[0_0_5px_white]"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-center gap-4 h-14">
+          <button
+            id="start-btn"
+            class="px-8 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95"
+          >
+            Start Camera
+          </button>
+        </div>
+      </main>
+
+      <aside class="w-[350px] flex-shrink-0 flex flex-col gap-3">
+        <div
+          class="ai-panel p-5 rounded-xl flex flex-col h-full relative overflow-hidden"
+        >
+          <h2
+            class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4"
+          >
+            Translation Output
+          </h2>
+
+          <div
+            id="sentence-box"
+            class="flex-grow bg-black/40 border border-purple-500/20 rounded-xl p-4 mb-4 overflow-y-auto relative group"
+          >
+            <div
+              id="sentence-text"
+              class="text-xl leading-relaxed text-gray-100 font-medium min-h-[40px]"
+            ></div>
+          </div>
+
+          <div
+            id="suggestions-area"
+            class="h-32 mb-4 transition-all duration-300"
+          >
+            <h3 class="text-xs font-semibold text-gray-500 mb-2">
+              CONFIDENCE & SUGGESTIONS
+            </h3>
+            <div id="suggestions-list" class="space-y-2 overflow-y-auto h-24">
+              <div class="text-center text-gray-600 italic text-sm mt-8">
+                Waiting for input...
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="static-output-area"
+            class="h-32 flex flex-col items-center justify-center transition-all duration-300 hidden"
+          >
+            <div
+              id="static-char"
+              class="text-9xl font-bold text-white drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]"
+            >
+              -
+            </div>
+            <div id="static-conf" class="text-purple-300 font-mono mt-2">
+              0.0%
+            </div>
+          </div>
+
+          <div class="mt-auto space-y-3 pt-4 border-t border-gray-700/50">
+            <button
+              id="process-translate-btn"
+              class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full shadow-lg transition-colors flex items-center justify-center gap-2"
+            >
+              <span>Process & Translate</span>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                ></path>
+              </svg>
+            </button>
+
+            <div class="flex gap-2">
+              <button
+                id="clear-entry-btn"
+                class="flex-1 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-full transition-colors"
+              >
+                Clear Last
+              </button>
+              <button
+                id="clear-all-btn"
+                class="flex-1 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-full transition-colors"
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <script>
+      /* ================= CONFIGURATION ================= */
+      const API_URL = "http://localhost:5001";
+      const MOTION_THRESHOLD = 0.03; // Sensitivity for wrist movement (0.0 to 1.0)
+      const RECORD_DURATION = 4000; // 4 seconds recording
+
+      /* ================= DOM ELEMENTS ================= */
+      const els = {
+        app: document.getElementById("app"),
+        body: document.getElementById("page-body"),
+        video: document.getElementById("webcam"),
+        canvas: document.getElementById("landmark-canvas"),
+        startBtn: document.getElementById("start-btn"),
+        modeToggle: document.getElementById("mode-toggle"),
+        videoWrapper: document.getElementById("video-wrapper"),
+        modeDescription: document.getElementById("mode-description"),
+        // Overlays
+        dynamicOverlay: document.getElementById("dynamic-overlay"),
+        statusBadge: document.getElementById("status-badge"),
+        timerDisplay: document.getElementById("timer-display"),
+        progressContainer: document.getElementById("progress-container"),
+        progressFill: document.getElementById("progress-fill"),
+        motionMeterContainer: document.getElementById("motion-meter-container"),
+        motionBar: document.getElementById("motion-bar"),
+        motionValue: document.getElementById("motion-value"),
+
+        // Sidebar Inputs
+        staticLabel: document.getElementById("static-label"),
+        dynamicLabel: document.getElementById("dynamic-label"),
+        instructionPanel: document.getElementById("instruction-panel"),
+        dynamicInstructions: document.getElementById("dynamic-instructions"),
+        langSelect: document.getElementById("language-select"),
+
+        // Outputs
+        sentenceText: document.getElementById("sentence-text"),
+        suggestionsList: document.getElementById("suggestions-list"),
+        suggestionsArea: document.getElementById("suggestions-area"),
+        staticOutputArea: document.getElementById("static-output-area"),
+        staticChar: document.getElementById("static-char"),
+        staticConf: document.getElementById("static-conf"),
+
+        // Buttons
+        processTranslateBtn: document.getElementById("process-translate-btn"),
+        clearEntryBtn: document.getElementById("clear-entry-btn"),
+        clearAllBtn: document.getElementById("clear-all-btn"),
+      };
+
+      /* ================= STATE MANAGEMENT ================= */
+      const STATE = {
+        MODE: "static", // 'static' or 'dynamic'
+        STATUS: "IDLE", // 'IDLE', 'RECORDING', 'PROCESSING', 'RESULT'
+        IS_CAMERA_ON: false,
+        LAST_WRIST: null, // {x, y}
+        RECORD_START_TIME: 0,
+        LAST_ADDED_WORD: null,
+      };
+
+      let mediaRecorder = null;
+      let recordedChunks = [];
+      let animationFrameId = null;
+
+      /* ================= INITIALIZATION ================= */
+      const hands = new Hands({
+        locateFile: (file) =>
+          `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`,
+      });
+
+      hands.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.4,
+      });
+
+      hands.onResults(onMediaPipeResults);
+
+      const camera = new Camera(els.video, {
+        onFrame: async () => {
+          await hands.send({ image: els.video });
+        },
+        width: 1280,
+        height: 720,
+      });
+
+      /* ================= EVENT LISTENERS ================= */
+      els.startBtn.addEventListener("click", async () => {
+        try {
+          await camera.start();
+          STATE.IS_CAMERA_ON = true;
+          els.startBtn.classList.add("hidden");
+
+          // Canvas Setup
+          els.canvas.width = els.video.videoWidth || 640;
+          els.canvas.height = els.video.videoHeight || 480;
+        } catch (e) {
+          alert("Camera failed to start: " + e.message);
+        }
+      });
+
+      els.modeToggle.addEventListener("change", () => {
+        if (els.modeToggle.checked) {
+          setMode("dynamic");
+        } else {
+          setMode("static");
+        }
+      });
+
+      /* --- RESTORED BUTTON LOGIC --- */
+
+      // 1. Process & Translate
+      els.processTranslateBtn.addEventListener("click", async () => {
+        const sentence = els.sentenceText.textContent.trim();
+        const language = els.langSelect.value;
+
+        if (!sentence) {
+          alert("Sentence is empty");
+          return;
+        }
+
+        els.processTranslateBtn.textContent = "Processing...";
+        els.processTranslateBtn.disabled = true;
+
+        try {
+          const res = await fetch(`${API_URL}/process_translate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sentence: sentence,
+              language: language,
+            }),
+          });
+
+          if (!res.ok) throw new Error("Backend error");
+
+          const data = await res.json();
+          if (!data.success) throw new Error("Processing failed");
+
+          // Update sentence and speak
+          els.sentenceText.textContent = data.translated_sentence;
+          speakText(data.translated_sentence, language);
+        } catch (err) {
+          console.error(err);
+          alert("Error during translation: " + err.message);
+        } finally {
+          // Reset Button
+          els.processTranslateBtn.innerHTML = `<span>Process & Translate</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>`;
+          els.processTranslateBtn.disabled = false;
+        }
+      });
+
+      // 2. Clear Last Entry
+      els.clearEntryBtn.addEventListener("click", () => {
+        const text = els.sentenceText.textContent.trim();
+        if (!text) return;
+
+        window.speechSynthesis.cancel();
+        const words = text.split(/\s+/);
+        words.pop();
+        els.sentenceText.textContent = words.join(" ");
+        STATE.LAST_ADDED_WORD = null;
+      });
+
+      // 3. Clear All
+      els.clearAllBtn.addEventListener("click", () => {
+        window.speechSynthesis.cancel();
+        els.sentenceText.textContent = "";
+        STATE.LAST_ADDED_WORD = null;
+      });
+
+      /* ================= LOGIC: MODE SWITCHING ================= */
+      function setMode(mode) {
+        STATE.MODE = mode;
+        STATE.STATUS = "IDLE"; // Reset status on switch
+
+        if (mode === "dynamic") {
+          // UI Changes
+          els.body.classList.remove("static-mode");
+          els.body.classList.add("dynamic-mode");
+          els.staticLabel.classList.remove("text-orchid");
+          els.dynamicLabel.classList.add("text-orchid");
+
+          // Show Dynamic UI
+          els.dynamicOverlay.classList.remove("hidden");
+          els.motionMeterContainer.classList.remove("hidden");
+          els.suggestionsArea.classList.remove("hidden");
+          els.dynamicInstructions.classList.remove("hidden");
+          els.body.classList.remove("static-mode");
+          els.body.classList.add("dynamic-mode");
+          // Hide Static UI
+          els.staticOutputArea.classList.add("hidden");
+
+          updateStatusUI("IDLE");
+        } else {
+          // UI Changes
+          els.body.classList.remove("dynamic-mode");
+          els.body.classList.add("static-mode");
+          els.dynamicLabel.classList.remove("text-orchid");
+          els.staticLabel.classList.add("text-orchid");
+
+          // Hide Dynamic UI
+          els.dynamicOverlay.classList.add("hidden");
+          els.motionMeterContainer.classList.add("hidden");
+          els.suggestionsArea.classList.add("hidden");
+          els.dynamicInstructions.classList.add("hidden");
+
+          // Show Static UI
+          els.staticOutputArea.classList.remove("hidden");
+
+          // Clear pulses
+          els.videoWrapper.classList.remove("recording-pulse");
+        }
+      }
+
+      /* ================= LOGIC: MAIN LOOP ================= */
+      function onMediaPipeResults(results) {
+        // Draw Landmarks
+        const ctx = els.canvas.getContext("2d");
+        ctx.clearRect(0, 0, els.canvas.width, els.canvas.height);
+        ctx.drawImage(results.image, 0, 0, els.canvas.width, els.canvas.height);
+
+        if (
+          results.multiHandLandmarks &&
+          results.multiHandLandmarks.length > 0
+        ) {
+          // --- NEW CODE: Iterate through ALL detected hands ---
+          for (const landmarks of results.multiHandLandmarks) {
+            drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
+              color: "#a78bfa",
+              lineWidth: 2,
+            });
+            drawLandmarks(ctx, landmarks, { color: "#f472b6", lineWidth: 1 });
+          }
+
+          // --- Logic Handling ---
+          // For the translation logic, we usually prioritize the first detected hand (primary)
+          // to avoid sending double requests or conflicting motion data.
+          const primaryHand = results.multiHandLandmarks[0];
+
+          // Mode Specific Logic
+          if (STATE.MODE === "static") {
+            handleStaticMode(primaryHand);
+          } else {
+            handleDynamicMode(primaryHand);
+          }
+        } else {
+          // No hand detected
+          if (STATE.MODE === "dynamic" && STATE.STATUS === "IDLE") {
+            updateMotionMeter(0);
+          }
+        }
+      }
+
+      /* ================= LOGIC: DYNAMIC GESTURES ================= */
+      function handleDynamicMode(landmarks) {
+        // 1. Calculate Motion (Wrist Movement)
+        const wrist = landmarks[0];
+        let motion = 0;
+
+        if (STATE.LAST_WRIST) {
+          const dx = wrist.x - STATE.LAST_WRIST.x;
+          const dy = wrist.y - STATE.LAST_WRIST.y;
+          motion = Math.sqrt(dx * dx + dy * dy);
+        }
+        STATE.LAST_WRIST = wrist;
+
+        // Update Motion Meter UI
+        updateMotionMeter(motion);
+
+        // 2. State Machine
+        if (STATE.STATUS === "IDLE") {
+          // CHECK TRIGGER
+          if (motion > MOTION_THRESHOLD) {
+            startRecording();
+          }
+        } else if (STATE.STATUS === "RECORDING") {
+          // UPDATE TIMER
+          const elapsed = Date.now() - STATE.RECORD_START_TIME;
+          const remaining = Math.max(0, RECORD_DURATION - elapsed);
+          const pct = (elapsed / RECORD_DURATION) * 100;
+
+          els.progressFill.style.width = `${pct}%`;
+          els.timerDisplay.textContent = (remaining / 1000).toFixed(1) + "s";
+
+          // Auto Stop handled by setTimeout in startRecording
+        }
+        // If PROCESSING, do nothing (block input)
+      }
+
+      function updateMotionMeter(val) {
+        // Normalize for display (scale up 0.05 to 100%)
+        const pct = Math.min(100, (val / 0.05) * 100);
+        els.motionBar.style.width = `${pct}%`;
+        els.motionValue.textContent = `${pct.toFixed(0)}%`;
+
+        // Color based on threshold
+        if (val > MOTION_THRESHOLD) {
+          els.motionBar.classList.remove("bg-emerald-400");
+          els.motionBar.classList.add("bg-red-500");
+        } else {
+          els.motionBar.classList.add("bg-emerald-400");
+          els.motionBar.classList.remove("bg-red-500");
+        }
+      }
+
+      async function startRecording() {
+        if (STATE.STATUS !== "IDLE") return;
+
+        // Transition State
+        updateStatusUI("RECORDING");
+        STATE.RECORD_START_TIME = Date.now();
+
+        // Start MediaRecorder
+        const stream = els.video.srcObject;
+        mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+        recordedChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          // Recording Finished -> Process
+          updateStatusUI("PROCESSING");
+
+          const blob = new Blob(recordedChunks, { type: "video/webm" });
+          await sendToBackend(blob);
+        };
+
+        mediaRecorder.start();
+
+        // Set fixed duration stop
+        setTimeout(() => {
+          if (mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+          }
+        }, RECORD_DURATION);
+      }
+
+      async function sendToBackend(videoBlob) {
+        const formData = new FormData();
+        formData.append("video", videoBlob, "gesture_clip.mp4");
+
+        try {
+          const res = await fetch(`${API_URL}/predict/dynamic`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            updateStatusUI("RESULT");
+            handleDynamicResponse(data);
+
+            // Cooldown before allowing next gesture
+            setTimeout(() => {
+              updateStatusUI("IDLE");
+            }, 1500);
+          } else {
+            console.error("Backend Error:", data.error);
+            updateStatusUI("IDLE");
+          }
+        } catch (err) {
+          console.error("Network Error:", err);
+          updateStatusUI("IDLE");
+        }
+      }
+
+      function updateStatusUI(status) {
+        STATE.STATUS = status;
+
+        // Reset styles
+        els.statusBadge.className =
+          "px-4 py-2 rounded-lg backdrop-blur-md font-bold text-white shadow-lg transition-colors duration-300 border";
+        els.videoWrapper.classList.remove("recording-pulse");
+        els.progressContainer.classList.add("hidden");
+        els.timerDisplay.classList.add("hidden");
+
+        switch (status) {
+          case "IDLE":
+            els.statusBadge.textContent = "WAITING FOR MOTION";
+            els.statusBadge.classList.add(
+              "bg-blue-600/80",
+              "border-blue-400/50"
+            );
+            break;
+          case "RECORDING":
+            els.statusBadge.textContent = "RECORDING...";
+            els.statusBadge.classList.add("bg-red-600/90", "border-red-400/50");
+            els.videoWrapper.classList.add("recording-pulse");
+            els.progressContainer.classList.remove("hidden");
+            els.timerDisplay.classList.remove("hidden");
+            break;
+          case "PROCESSING":
+            els.statusBadge.textContent = "PROCESSING...";
+            els.statusBadge.classList.add(
+              "bg-yellow-600/80",
+              "border-yellow-400/50"
+            );
+            break;
+          case "RESULT":
+            els.statusBadge.textContent = "SUCCESS";
+            els.statusBadge.classList.add(
+              "bg-green-600/80",
+              "border-green-400/50"
+            );
+            break;
+        }
+      }
+
+      function handleDynamicResponse(data) {
+        // Populate suggestions
+        els.suggestionsList.innerHTML = "";
+        data.top_k.forEach((item) => {
+          const div = document.createElement("div");
+          div.className =
+            "flex justify-between items-center bg-white/5 p-2 rounded hover:bg-white/10 transition";
+          div.innerHTML = `
+                    <span class="text-white font-medium">${item.class}</span>
+                    <span class="text-xs text-purple-300">${item.confidence_percent.toFixed(
+                      1
+                    )}%</span>
+                `;
+          els.suggestionsList.appendChild(div);
+        });
+
+        // Append top result to sentence
+        const best = data.prediction;
+        if (best && best !== STATE.LAST_ADDED_WORD) {
+          els.sentenceText.textContent +=
+            (els.sentenceText.textContent ? " " : "") + best;
+          STATE.LAST_ADDED_WORD = best;
+          speakText(best, "en"); // Speak the English word immediately
+
+          // Keep scroll at bottom
+          els.sentenceBox = document.getElementById("sentence-box");
+          els.sentenceBox.scrollTop = els.sentenceBox.scrollHeight;
+        }
+      }
+
+      /* ================= LOGIC: STATIC GESTURES ================= */
+      /* ================= LOGIC: STATIC GESTURES ================= */
+// Add a variable to track the last character to prevent spamming
+
+
+/* ================= LOGIC: STATIC GESTURES ================= */
+// Track the last character
+let lastStaticChar = "";
+
+async function handleStaticMode(landmarks) {
+  // 1. Throttle: Limit API calls to every 500ms
+  const now = Date.now();
+  if (now - STATE.RECORD_START_TIME < 300) return;
+  STATE.RECORD_START_TIME = now;
+
+  const payload = landmarks.map((p) => ({ x: p.x, y: p.y }));
+
+  try {
+    const res = await fetch(`${API_URL}/predict/static`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hands: [{ landmarks: payload }] }),
+    });
+    const data = await res.json();
+
+    if (data.success && data.confidence > 0.8) {
+      const char = data.prediction;
+
+      // Update the large display
+      els.staticChar.textContent = char;
+      els.staticConf.textContent = (data.confidence * 100).toFixed(1) + "%";
+
+      // --- LOGIC FIX: ONLY Append if the character is DIFFERENT ---
+      if (char !== lastStaticChar) {
+        
+        els.sentenceText.textContent += char;
+        
+        // Scroll to bottom
+        const box = document.getElementById("sentence-box");
+        box.scrollTop = box.scrollHeight;
+
+        // Update tracker
+        lastStaticChar = char;
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+      /* ================= UTILS: TTS LOGIC ================= */
+      function speakText(text, langCode) {
+        if (!text) return;
+
+        // Stop previous speech to avoid overlap
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Map language selection to TTS language codes
+        const LANG_TTS_MAP = {
+          hi: "hi-IN",
+          pa: "pa-IN",
+          bn: "bn-IN",
+          gu: "gu-IN",
+          mr: "mr-IN",
+          en: "en-US",
+        };
+
+        utterance.lang = LANG_TTS_MAP[langCode] || "en-US";
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+
+        window.speechSynthesis.speak(utterance);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "num_classes": 8,
+  "class_names": [
+    "Hospital ",
+    "How_Are_You_",
+    "Monday",
+    "Night",
+    "Shoe",
+    "Street",
+    "Thank You",
+    "Yellow"
+  ],
+  "train_samples": 1194,
+  "val_samples": 137,
+  "processing_time_minutes": 144.92083124717075
+}
