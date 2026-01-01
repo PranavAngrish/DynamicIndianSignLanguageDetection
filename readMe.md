@@ -6,14 +6,14 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://tensorflow.org/)
 [![MediaPipe](https://img.shields.io/badge/MediaPipe-Latest-green.svg)](https://mediapipe.dev/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 
 ---
 
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
-- [The 6-Month Journey](#-the-6-month-journey)
+- [The Complete Journey](#-the-complete-journey)
 - [System Architecture](#-system-architecture)
 - [Key Innovations](#-key-innovations)
 - [Technical Deep Dive](#-technical-deep-dive)
@@ -42,41 +42,43 @@ This project represents a **complete end-to-end solution** for Indian Sign Langu
 - ✅ **Multi-Language NLP**: ISL → English → Hindi/Punjabi/etc.
 - ✅ **Geometric Corrections**: Physics-based post-processing
 
+### Video demonstration
+
 ---
 
-## 🚀 The 6-Month Journey
+## 🚀 The Complete Journey
 
-### Phase 1: Research & Foundation (Month 1-2)
+### Phase 1: Research & Foundation
 - **Problem Analysis**: Studied ISL linguistic structure, regional variations
 - **Literature Review**: 50+ papers on sign language recognition, pose estimation
 - **Data Collection**: Recorded 2000+ video samples across 60+ signs
 - **Challenge Identified**: ISL != ASL - unique grammar, lack of datasets
 
-### Phase 2: Data Pipeline Development (Month 2-3)
+### Phase 2: Data Pipeline Development 
 - **Custom Preprocessing**: Built parallel processing pipeline (reduced 12hrs → 2hrs)
 - **Multi-Modal Extraction**: MediaPipe integration for 154D landmark features
 - **Smart Augmentation**: 8 augmentation strategies without distorting hand geometry
 - **Quality Control**: Frame quality scoring + landmark interpolation
 
-### Phase 3: Model Architecture (Month 3-4)
+### Phase 3: Model Architecture
 - **Two-Stream Transformer**: Parallel visual + pose processing
 - **Hierarchical Gating**: 2-stage classification for scalability
 - **Specialist Models**: Group-specific expert networks
 - **Ensemble Learning**: Dual-model verification (NN + RF)
 
-### Phase 4: Production Engineering (Month 4-5)
+### Phase 4: Production Engineering
 - **REST API**: Flask backend with CORS, file handling
 - **Real-Time Processing**: WebRTC video streaming + frame buffering
 - **Error Handling**: Comprehensive exception management
 - **Optimization**: Mixed precision training, model compression
 
-### Phase 5: NLP & Translation (Month 5-6)
+### Phase 5: NLP & Translation
 - **ISL Grammar Parser**: Custom rule engine for ISL → English
 - **Multi-Language Support**: Integration with translation APIs
 - **Context Enhancement**: Sentence formation from isolated signs
 - **TTS Integration**: Text-to-speech for accessibility
 
-### Phase 6: Testing & Refinement (Month 6)
+### Phase 6: Testing & Refinement 
 - **Edge Cases**: Lighting variations, occlusions, hand orientations
 - **Geometric Validation**: Physics-based corrections for impossible poses
 - **Performance Tuning**: Latency optimization (<100ms inference)
