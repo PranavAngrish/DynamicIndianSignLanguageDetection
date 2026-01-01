@@ -108,7 +108,6 @@ https://github.com/user-attachments/assets/ee1bcafd-d428-41df-8119-fb0e7b57fb12
 ### Phase 6: Testing & Refinement 
 - **Edge Cases**: Lighting variations, occlusions, hand orientations
 - **Geometric Validation**: Physics-based corrections for impossible poses
-- **Performance Tuning**: Latency optimization (<100ms inference)
 - **User Testing**: Feedback from ISL users
 
 ---
@@ -773,7 +772,7 @@ else: interpolation = 'nearest'
 
 ### Data Collection
 - **Total Videos**: 2000+ recordings
-- **Signs Covered**: 60+ ISL signs
+- **Signs Covered**: 80+ ISL signs
 - **Participants**: 10+ signers (diversity)
 - **Environments**: Indoor/outdoor, varying lighting
 - **Recording**: 25 FPS, 720p resolution
@@ -1237,10 +1236,10 @@ video: <binary file>
 ### Challenge 1: Limited ISL Dataset
 **Problem:** No large-scale ISL dataset available  
 **Solution:**
-- Recorded 2000+ videos from 15+ signers
+- Recorded 2000+ videos from 10+ signers
 - Multi-environment capture (indoor/outdoor)
 - Data augmentation (8 strategies)
-- Result: Effective dataset of 5000+ samples
+- Result: Effective dataset of 12k+ samples
 
 ### Challenge 2: Real-Time Processing
 **Problem:** Heavy models → High latency  
@@ -1249,7 +1248,6 @@ video: <binary file>
 - Model quantization (INT8)
 - Frame buffering + quality scoring
 - Mixed precision inference
-- Result: <100ms end-to-end latency
 
 ### Challenge 3: ISL ≠ ASL
 **Problem:** ISL grammar fundamentally different  
