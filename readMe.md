@@ -1368,7 +1368,6 @@ IEEE 7000 Series Standards, 2020–2021.
 - **NLP**: Transformers, Custom Grammar Parser
 - **Backend**: Flask, Waitress, CORS
 - **Frontend**: HTML5, JavaScript, WebRTC
-- **Deployment**: Docker, Nginx, Gunicorn
 
 ---
 
@@ -1401,7 +1400,7 @@ Sign language users face daily communication barriers. This system isn't just ab
 
 **Developer:** Pranav  
 **Email:** pranavangrishwork@gmail.com  
-**LinkedIn:** [Your LinkedIn]   
+**LinkedIn:** https://www.linkedin.com/in/pranav-angrish-2b3693252/  
 
 
 ---
