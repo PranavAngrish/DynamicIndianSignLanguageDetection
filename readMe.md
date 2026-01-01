@@ -67,6 +67,9 @@ https://github.com/user-attachments/assets/12219c21-2758-40c8-8b37-9244eff5704a
 
 https://github.com/user-attachments/assets/ee1bcafd-d428-41df-8119-fb0e7b57fb12
 
+<img width="384" height="492" alt="Screenshot 2026-01-01 at 5 20 13 PM" src="https://github.com/user-attachments/assets/dc780322-6bdb-49b9-951e-0cffec213a42" />
+
+
 
 ---
 
@@ -673,6 +676,15 @@ Custom multiprocessing implementation:
 - Shared memory for landmarks
 - Smart frame quality scoring
 - Checkpoint-based recovery
+
+
+<img width="348" height="187" alt="Screenshot 2026-01-01 at 5 19 04 PM" src="https://github.com/user-attachments/assets/3e1405e1-8f28-4b2d-a98f-7a7311c334f5" />
+
+
+https://github.com/user-attachments/assets/6071f9b3-5bff-4ade-a844-736b254581bf
+
+
+
 
 ### 6. **Production-Grade Error Handling**
 Every failure mode anticipated:
