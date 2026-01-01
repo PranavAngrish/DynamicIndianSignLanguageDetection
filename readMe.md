@@ -44,6 +44,12 @@ This project represents a **complete end-to-end solution** for Indian Sign Langu
 
 ### Video demonstration
 
+
+https://github.com/user-attachments/assets/53b497c6-9540-4f7e-b9af-2e9bbaa90f9b
+
+https://github.com/user-attachments/assets/12219c21-2758-40c8-8b37-9244eff5704a
+
+
 ---
 
 ## 🚀 The Complete Journey
